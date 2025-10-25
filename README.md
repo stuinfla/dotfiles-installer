@@ -1,6 +1,8 @@
 # Dotfiles Installer
 
-Automated installation and configuration tools for [Stuart's dotfiles](https://github.com/stuinfla/dotfiles-clean).
+**Development workshop for [Stuart's dotfiles](https://github.com/stuinfla/dotfiles)**
+
+This repo contains the automation machinery, testing tools, and development workflow for building and maintaining the production dotfiles configuration.
 
 ## 🚀 Quick Start
 
@@ -20,13 +22,58 @@ cd dotfiles-installer
 
 The installer automates:
 
-1. **Clones dotfiles repo** - Fetches clean configuration from [dotfiles-clean](https://github.com/stuinfla/dotfiles-clean)
+1. **Clones dotfiles repo** - Fetches clean configuration from [dotfiles](https://github.com/stuinfla/dotfiles)
 2. **Backs up existing configs** - Saves your current dotfiles to `~/.dotfiles.backup`
 3. **Installs configurations** - Copies all dotfiles to appropriate locations
 4. **Sets up MCP servers** - Configures Claude Flow, Sequential Thinking, Context7
 5. **Validates installation** - Runs health checks and verification
 6. **Configures VS Code** - Installs recommended extensions
 7. **Sets up devcontainer** - Configures GitHub Codespaces support
+
+---
+
+## 🏗️ Repository Architecture
+
+### Two-Repo Strategy
+
+**[dotfiles](https://github.com/stuinfla/dotfiles)** - Production (What Users Fork)
+- Clean configuration files only
+- Users fork this repo and enable in Codespaces settings
+- GitHub auto-installs on new codespaces
+- **This is the public-facing repo**
+
+**[dotfiles-installer](https://github.com/stuinfla/dotfiles-installer)** - Development (This Repo)
+- All automation machinery and testing tools
+- Development and validation scripts
+- Comprehensive documentation
+- **This is YOUR workshop**
+
+### Development Workflow
+
+```
+1. Development (This Repo)
+   ├── Create new features
+   ├── Test automation scripts
+   ├── Validate configurations
+   └── Update documentation
+
+2. Production Release
+   ├── Copy clean configs → dotfiles repo
+   ├── Update dotfiles README
+   ├── Commit to dotfiles repo
+   └── Users get updates via git pull
+
+3. End Users
+   ├── Fork stuinfla/dotfiles
+   ├── Enable in Codespaces settings
+   └── Automatic installation on new codespaces
+```
+
+**Why This Works:**
+- ✅ **Clean separation** - Configuration vs machinery
+- ✅ **Easy adoption** - Users just fork dotfiles
+- ✅ **Flexible development** - Full tooling in installer
+- ✅ **Standard naming** - dotfiles repo follows conventions
 
 ## 📚 Scripts
 
@@ -47,7 +94,7 @@ If you prefer manual control:
 
 ```bash
 # 1. Clone dotfiles repo
-git clone https://github.com/stuinfla/dotfiles-clean.git ~/dotfiles
+git clone https://github.com/stuinfla/dotfiles.git ~/dotfiles
 
 # 2. Backup existing dotfiles
 mkdir -p ~/.dotfiles.backup
@@ -111,7 +158,7 @@ The installer sets up the complete SuperClaude AI framework:
 ### Environment Variables
 ```bash
 # Customize installation
-export DOTFILES_REPO="https://github.com/stuinfla/dotfiles-clean.git"
+export DOTFILES_REPO="https://github.com/stuinfla/dotfiles.git"
 export DOTFILES_DIR="$HOME/dotfiles"
 export BACKUP_DIR="$HOME/.dotfiles.backup"
 
@@ -147,7 +194,7 @@ claude mcp list
 
 ## 🔗 Related Resources
 
-- **[dotfiles-clean](https://github.com/stuinfla/dotfiles-clean)** - Clean configuration files
+- **[dotfiles](https://github.com/stuinfla/dotfiles)** - Production configuration (what users fork)
 - **[Claude Code](https://github.com/anthropics/claude-code)** - Anthropic's official CLI
 - **[Claude Flow](https://github.com/ruvnet/claude-flow)** - Multi-agent orchestration
 - **[Sequential Thinking](https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking)** - Structured reasoning
