@@ -23,10 +23,19 @@
   // VS Code customizations - Extension control
   "customizations": {
     "vscode": {
-      // List allowed extensions here
+      // Essential extensions only
       "extensions": [
-        // Add your project's required extensions
-        // Example: "ms-python.python"
+        "anthropic.claude-code",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "ms-toolsai.jupyter",
+        "cweijan.vscode-office",
+        "grapecity.gc-excelviewer",
+        "tomoki1207.pdf",
+        "shd101wyy.markdown-preview-enhanced",
+        "yzhang.markdown-all-in-one",
+        "eamodio.gitlens"
       ],
       // Prevent unwanted extension behavior
       "settings": {
@@ -42,6 +51,9 @@
   // Run install script if using dotfiles
   // Use $DOTFILES environment variable (set by GitHub Codespaces) for correct path
   "postCreateCommand": "bash -c 'if [ -n \"$DOTFILES\" ] && [ -f \"$DOTFILES/install.sh\" ]; then timeout 900 bash \"$DOTFILES/install.sh\"; else echo \"No dotfiles found, skipping installation\"; fi'",
+
+  // Shutdown safety: warn and auto-save uncommitted changes
+  "postStopCommand": "bash -c 'if git status --porcelain | grep -q .; then echo \"⚠️ WARNING: Uncommitted changes detected! Auto-saving...\"; git add -A && git commit -m \"Auto-save on shutdown: $(date '+%Y-%m-%d %H:%M:%S')\" && git push || echo \"❌ Failed to push changes\"; else echo \"✅ No uncommitted changes\"; fi'",
 
   // Set user
   "remoteUser": "codespace"

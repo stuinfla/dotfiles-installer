@@ -186,6 +186,15 @@ if [ -d "/workspaces" ]; then
     fi
 fi
 
+# Copy .claude-flow directory for full instantiation
+if [ -d "$DOTFILES_DIR/.claude-flow" ]; then
+    if cp -r "$DOTFILES_DIR/.claude-flow" ~/ 2>/dev/null; then
+        success "Copied .claude-flow directory (full instantiation)"
+    else
+        log "⚠️  Could not copy .claude-flow (will be created by init)"
+    fi
+fi
+
 # Actively remove Cline extension if it's installed
 if command -v code &> /dev/null; then
     log "🔧 Removing Cline extension if installed..."
@@ -262,6 +271,18 @@ if timeout $PACKAGE_TIMEOUT npm install -g claude-flow@alpha --force 2>&1 | (gre
             success "Claude Flow configuration initialized"
         else
             warn "Claude Flow init had issues (may need manual setup)"
+        fi
+
+        # CRITICAL: Register Claude Flow as MCP server
+        log "Registering Claude Flow as MCP server..."
+        if command -v claude &> /dev/null; then
+            if claude mcp add claude-flow npx claude-flow@alpha mcp start 2>&1 | tail -2; then
+                success "Claude Flow MCP server registered"
+            else
+                error "CRITICAL: Failed to register Claude Flow MCP server"
+            fi
+        else
+            warn "Claude CLI not available yet - MCP registration will be attempted later"
         fi
     else
         warn "Claude Flow installation completed but command not found"
@@ -535,6 +556,26 @@ EOF
     echo "🔍 To view installation details:"
     echo "   cat $SUMMARY_FILE"
     echo "   cat /tmp/dotfiles-install.log"
+fi
+
+# ═══════════════════════════════════════════════════════════════════
+# Auto-reload shell and verify DSP alias
+# ═══════════════════════════════════════════════════════════════════
+
+echo ""
+log "🔄 Reloading shell configuration..."
+if [ -f ~/.bashrc ]; then
+    source ~/.bashrc 2>&1 | tee -a /tmp/dotfiles-install.log || true
+    success "Shell configuration reloaded"
+
+    # Verify DSP alias is available
+    if type dsp >/dev/null 2>&1; then
+        success "DSP function verified and ready to use"
+    else
+        warn "DSP function not found after reload"
+    fi
+else
+    warn "~/.bashrc not found, skipping reload"
 fi
 
 echo ""

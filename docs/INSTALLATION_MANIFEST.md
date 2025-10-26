@@ -18,14 +18,18 @@
 1. **Claude Code** (@latest via npm)
    - Official Anthropic CLI
    - Version: Latest stable (2.0.25+)
+   - **Auto-updates daily** (silent background)
 
 2. **SuperClaude** (optional - silent if fails)
    - Enhanced framework with /sc: commands
    - Installed via pip/pipx if available
+   - **Auto-updates daily** (silent background)
 
 3. **Claude Flow @alpha** (@latest via npm)
    - Advanced workflow automation
    - Provides 90+ additional MCP servers
+   - **Registered as MCP server** (full instantiation)
+   - **Auto-updates daily** (silent background)
 
 ### MCP Servers (4 Essential)
 Installed globally via npm:
@@ -55,6 +59,48 @@ Blocked extensions (will never install):
 - ❌ GitHub Copilot Chat (github.copilot-chat)
 
 ---
+
+## 🔄 AUTOMATIC DAILY UPDATES
+
+### What Gets Updated Automatically
+The system runs **silent background updates daily** for:
+1. **Claude Code** - Latest stable version
+2. **SuperClaude** - Latest release
+3. **Claude Flow @alpha** - Latest alpha version
+4. **VS Code Extensions** - All installed extensions
+
+### How It Works
+- **Trigger**: First shell start each day (if >24hrs since last update)
+- **Execution**: Background process (non-blocking, silent)
+- **Logging**: `~/.cache/claude_update.log`
+- **Lock File**: `~/.cache/claude_update.lock` (prevents concurrent updates)
+- **Timestamp**: `~/.cache/claude_update_last` (tracks last update time)
+
+### Update Process
+```
+1. Check if update needed (>24hrs since last)
+2. Acquire lock file (prevent concurrent updates)
+3. Update tools in background:
+   ├─ Claude Code (npm update)
+   ├─ SuperClaude (pipx upgrade or pip upgrade)
+   ├─ Claude Flow (npm update + re-init)
+   └─ VS Code Extensions (code --install-extension --force)
+4. Update timestamp file
+5. Release lock and exit
+```
+
+### Monitoring Updates
+```bash
+# View update log
+cat ~/.cache/claude_update.log
+
+# Check last update time
+cat ~/.cache/claude_update_last
+
+# Force immediate update (remove timestamp)
+rm ~/.cache/claude_update_last
+source ~/.bashrc  # Triggers update on next shell start
+```
 
 ## 🔇 SILENT INSTALLATION FEATURES
 

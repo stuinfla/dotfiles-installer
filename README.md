@@ -25,10 +25,11 @@ The installer automates:
 1. **Clones dotfiles repo** - Fetches clean configuration from [dotfiles](https://github.com/stuinfla/dotfiles)
 2. **Backs up existing configs** - Saves your current dotfiles to `~/.dotfiles.backup`
 3. **Installs configurations** - Copies all dotfiles to appropriate locations
-4. **Sets up MCP servers** - Configures Claude Flow, Sequential Thinking, Context7
-5. **Validates installation** - Runs health checks and verification
-6. **Configures VS Code** - Installs recommended extensions
-7. **Sets up devcontainer** - Configures GitHub Codespaces support
+4. **Sets up MCP servers** - Configures **Claude Flow MCP** (full instantiation) + 4 essential servers
+5. **Enables auto-updates** - Daily silent updates for Claude Code, SuperClaude, Claude Flow, VS Code
+6. **Validates installation** - Runs health checks and verification
+7. **Configures VS Code** - Blocks unwanted extensions (Cline, Copilot)
+8. **Sets up devcontainer** - Configures GitHub Codespaces support
 
 ---
 
@@ -132,11 +133,26 @@ Comprehensive guides in the `docs/` directory:
 
 ## 🎯 Features
 
+### Automatic Daily Updates 🔄
+- **Silent background updates** (no notifications, no blocking)
+- **Claude Code** - Latest stable version
+- **SuperClaude** - Latest release
+- **Claude Flow @alpha** - Latest alpha + re-initialization
+- **VS Code Extensions** - All installed extensions
+- **Logs**: `~/.cache/claude_update.log`
+
+### Claude Flow Full Instantiation 🌊
+- **Global installation** (`npm install -g claude-flow@alpha`)
+- **MCP server registration** (`claude mcp add claude-flow`)
+- **Directory instantiation** (`.claude-flow/` copied to home)
+- **Configuration initialization** (`claude-flow init --force`)
+- **90+ MCP tools** available for advanced workflows
+
 ### SuperClaude Framework
 The installer sets up the complete SuperClaude AI framework:
 - 11 specialized domain personas (Architect, Frontend, Backend, Security, etc.)
 - Intelligent routing and orchestration
-- MCP server integration (Claude Flow, Sequential, Context7)
+- MCP server integration (Claude Flow, Sequential, GitHub, Filesystem, Playwright)
 - Automated hooks for code formatting and quality
 - Neural training patterns for continuous improvement
 
@@ -144,7 +160,7 @@ The installer sets up the complete SuperClaude AI framework:
 - Pre-configured MCP servers for enhanced AI capabilities
 - SPARC methodology support for systematic development
 - Automated code formatting and quality checks
-- Session management and persistence
+- Session management and persistence (`~/.claude-sessions`)
 - Cross-session memory and context
 
 ### Development Environment
