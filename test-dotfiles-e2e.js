@@ -23,17 +23,18 @@ const path = require('path');
   console.log(`📁 Repository: ${REPO_URL}`);
   console.log(`📸 Screenshots: ${SCREENSHOTS_DIR}\n`);
 
-  // Launch browser
-  const browser = await chromium.launch({
-    headless: false,  // Run in visible mode to see the process
-    slowMo: 1000      // Slow down actions for visibility
+  // Launch Playwright's Chromium with persistent context (uses Chrome profile)
+  console.log('💡 Launching browser with your Chrome profile...\n');
+
+  const userDataDir = require('os').homedir() + '/Library/Application Support/Google/Chrome';
+  const context = await chromium.launchPersistentContext(userDataDir, {
+    headless: false,
+    viewport: { width: 1920, height: 1080 },
+    slowMo: 1000,
+    channel: 'chrome'  // Use actual Chrome instead of Chromium
   });
 
-  const context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 }
-  });
-
-  const page = await context.newPage();
+  const page = context.pages()[0] || await context.newPage();
 
   try {
     // Step 1: Navigate to repository
@@ -146,7 +147,7 @@ const path = require('path');
   } finally {
     console.log('\n⏰ Test will keep browser open for 30 seconds for manual inspection...');
     await page.waitForTimeout(30000);
-    await browser.close();
+    await context.close();
     console.log('✅ Browser closed');
   }
 })();

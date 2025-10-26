@@ -61,6 +61,8 @@ cd dotfiles-installer
 
 **✅ With This Automation (VibeCoding):**
 - **One-click setup** - Create codespace, grab coffee (literally), start coding in 5 minutes
+- **Real-time progress** - Watch installation progress live, never wonder if it's hanging
+- **Clean startup** - No confusing welcome screens, setup wizards, or extension prompts
 - **Consistent environment** - Identical setup on every codespace, every time, everywhere
 - **AI-powered development** - Claude Code + SuperClaude + Claude Flow ready instantly
 - **Never lose work** - Auto-save every 5 minutes + shutdown protection
@@ -192,6 +194,71 @@ Comprehensive guides in the `docs/` directory:
 - **[Claude-Flow-Quick-Reference-v2.7.0.md](docs/Claude-Flow-Quick-Reference-v2.7.0.md)** - Quick reference guide
 
 ## 🎯 Features
+
+### Real-Time Progress Visibility 📊 (NEW - Oct 2025)
+No more wondering if installation is working or hanging!
+
+**Live Progress Tracking:**
+```bash
+# Installation shows real-time progress:
+⏳ STEP 1/5: Copying configuration files...
+✅ Copied .bashrc to home directory
+✅ Copied .bash_profile to home directory
+⏳ Configuring VS Code to suppress welcome screens...
+✅ VS Code configured: Cline blocked + welcome screens suppressed
+
+⏳ STEP 2/5: Installing AI tools...
+⏳   [1/3] Installing Claude Code (latest)...
+✅         Claude Code installed
+⏳   [2/3] Installing SuperClaude (latest)...
+✅         SuperClaude installed
+
+⏳ Installing 4 essential MCP servers in parallel...
+✅   ✅ GitHub MCP
+✅   ✅ Filesystem MCP
+✅   ✅ Playwright MCP
+✅   ✅ Sequential Thinking MCP
+```
+
+**Monitor Installation Live:**
+```bash
+# If you want detailed progress:
+tail -f /tmp/dotfiles-progress.txt
+
+# For full logs:
+tail -f /tmp/dotfiles-install.log
+```
+
+**Benefits:**
+- ✅ See exactly what's happening at each step
+- ✅ Timestamped progress entries
+- ✅ Never wonder if it's working or stuck
+- ✅ Clear success/failure indicators
+- ✅ Can debug issues in real-time
+
+### Clean Startup Experience 🎨 (NEW - Oct 2025)
+No confusing welcome screens or setup wizards!
+
+**What We Suppress:**
+- ❌ VS Code theme selection and configuration wizards
+- ❌ Kombai "Build with agent mode" welcome screen
+- ❌ Extension "Getting Started" pages
+- ❌ Update notifications and prompts
+- ❌ Survey and feedback requests
+- ❌ Tutorial overlays and walkthroughs
+
+**What You Get Instead:**
+- ✅ Clean file explorer view on startup
+- ✅ All extensions installed and configured
+- ✅ No interruptions or questions
+- ✅ Ready to code immediately
+- ✅ Professional, distraction-free environment
+
+**How We Do It:**
+- Three-layer suppression system (workspace, container, runtime)
+- VS Code global state configuration
+- Extension-specific flag management
+- Runs automatically during installation
 
 ### Automatic Daily Updates 🔄
 - **Silent background updates** (no notifications, no blocking)
