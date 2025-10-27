@@ -38,15 +38,27 @@ echo "DEBUG: PWD=$PWD" >> /tmp/dotfiles-startup.log
 # Send stderr to log file but keep stdout visible
 exec 2>> "$LOG_FILE"
 
+clear  # Clear the terminal so user sees our messages
+
+echo ""
+echo "╔═══════════════════════════════════════════════════════════════════╗"
+echo "║                                                                   ║"
+echo "║          🚀  SETTING UP YOUR DEVELOPMENT ENVIRONMENT  🚀          ║"
+echo "║                                                                   ║"
+echo "╚═══════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "📦 What's being installed:"
+echo "   • Claude Code CLI - AI-powered coding assistant"
+echo "   • MCP Servers - Advanced tool integrations"
+echo "   • Development tools - git aliases, shell improvements"
+echo "   • Extension watchdog - Keeps unwanted extensions away"
+echo ""
+echo "⏱️  Expected time: 3-5 minutes"
+echo ""
+echo "💡 What's happening: This runs ONCE when creating a new codespace."
+echo "   Your workspace will be ready soon - grab a coffee! ☕"
 echo ""
 echo "════════════════════════════════════════════════════════════════════"
-echo "🚀 DOTFILES INSTALLATION STARTING"
-echo "════════════════════════════════════════════════════════════════════"
-echo ""
-echo "📊 Progress tracking: tail -f $PROGRESS_FILE"
-echo "📝 Full logs: tail -f $LOG_FILE"
-echo ""
-echo "⏱️  Expected time: 3-5 minutes (parallelized installation)"
 echo ""
 echo "════════════════════════════════════════════════════════════════════"
 echo ""
@@ -208,9 +220,12 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════
 
 echo ""
-echo "════════════════════════════════════════════════════════════════════"
-progress "STEP 1/5: Copying configuration files..."
-echo "════════════════════════════════════════════════════════════════════"
+echo "╔═══════════════════════════════════════════════════════════════════╗"
+echo "║  STEP 1/5: Setting up shell configuration                        ║"
+echo "╚═══════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "📝 Copying .bashrc, git config, and development aliases..."
+echo "   (These customize your terminal and git commands)"
 echo ""
 
 # Copy .bashrc FIRST (critical for shell aliases)
@@ -278,9 +293,20 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════
 
 echo ""
-echo "════════════════════════════════════════════════════════════════════"
-progress "STEP 2/5: Installing AI tools (Claude Code, SuperClaude, Claude Flow)..."
-echo "════════════════════════════════════════════════════════════════════"
+echo "╔═══════════════════════════════════════════════════════════════════╗"
+echo "║  STEP 2/5: Installing AI development tools                       ║"
+echo "╚═══════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "🤖 Installing Claude Code CLI - Your AI coding assistant"
+echo "   (Latest version from NPM, includes MCP support)"
+echo ""
+echo "⚡ Installing SuperClaude - Enhanced Claude capabilities"
+echo "   (Framework for advanced AI workflows)"
+echo ""
+echo "🌊 Installing Claude Flow @alpha - 90+ advanced tools"
+echo "   (MCP server with swarm orchestration)"
+echo ""
+echo "⏱️  This step takes ~2-3 minutes (downloading and installing packages)"
 echo ""
 
 # Install Claude Code with visible progress
@@ -352,63 +378,69 @@ fi
 
 echo ""
 
-# Actively remove unwanted extensions (background process for async installation)
-# Extensions install AFTER postCreateCommand finishes, so we run this in background
-log "🔧 Starting background extension removal..."
+# Start CONTINUOUS EXTENSION WATCHDOG
+# This watchdog starts NOW and monitors AFTER installation completes
+# It waits for extensions directory, then monitors for 5 minutes
+log "🔧 Starting extension watchdog (will run in background)..."
 
-# Create background script
-cat > /tmp/remove-extensions.sh << 'EXTENSION_REMOVER'
-#!/bin/bash
+# Start watchdog as truly detached background process
+# It will wait for extensions directory to appear, then monitor for 5 minutes
+setsid bash -c '
+    VSCODE_EXT_DIR="$HOME/.vscode-remote/extensions"
+    LOG_FILE="/tmp/extension-watchdog.log"
 
-VSCODE_EXT_DIR="$HOME/.vscode-remote/extensions"
-LOG_FILE="/tmp/extension-removal.log"
+    echo "========================================" >> "$LOG_FILE"
+    echo "[$(date)] Watchdog started - waiting for extensions directory..." >> "$LOG_FILE"
+    echo "========================================" >> "$LOG_FILE"
 
-echo "[$(date)] Extension removal script started" >> "$LOG_FILE"
-
-# Wait up to 2 minutes for extensions directory to appear
-for i in {1..120}; do
-    if [ -d "$VSCODE_EXT_DIR" ]; then
-        echo "[$(date)] Extensions directory found, waiting for extensions to install..." >> "$LOG_FILE"
-        sleep 10  # Give extensions time to populate
-
-        # Remove unwanted extensions
-        REMOVED=0
-
-        if rm -rf "$VSCODE_EXT_DIR"/kombai.kombai-* 2>/dev/null; then
-            echo "[$(date)] ✅ Removed Kombai extension" >> "$LOG_FILE"
-            REMOVED=1
+    # Wait up to 5 minutes for extensions directory to appear
+    for i in {1..300}; do
+        if [ -d "$VSCODE_EXT_DIR" ]; then
+            echo "[$(date)] Extensions directory found! Starting monitoring..." >> "$LOG_FILE"
+            break
         fi
+        sleep 1
+    done
 
-        if rm -rf "$VSCODE_EXT_DIR"/hbenl.vscode-test-explorer-* 2>/dev/null; then
-            echo "[$(date)] ✅ Removed Test Explorer UI" >> "$LOG_FILE"
-            REMOVED=1
-        fi
-
-        if rm -rf "$VSCODE_EXT_DIR"/saoudrizwan.claude-dev-* 2>/dev/null; then
-            echo "[$(date)] ✅ Removed Cline extension" >> "$LOG_FILE"
-            REMOVED=1
-        fi
-
-        if [ $REMOVED -eq 0 ]; then
-            echo "[$(date)] No unwanted extensions found" >> "$LOG_FILE"
-        fi
-
-        exit 0
+    if [ ! -d "$VSCODE_EXT_DIR" ]; then
+        echo "[$(date)] Extensions directory never appeared" >> "$LOG_FILE"
+        exit 1
     fi
-    sleep 1
-done
 
-echo "[$(date)] Extensions directory not found after 2 minutes" >> "$LOG_FILE"
-exit 1
-EXTENSION_REMOVER
+    # Now monitor for 5 minutes
+    START_TIME=$(date +%s)
+    REMOVAL_COUNT=0
 
-chmod +x /tmp/remove-extensions.sh
+    for iteration in {1..30}; do
+        echo "[$(date)] Check $iteration/30" >> "$LOG_FILE"
 
-# Start TRULY detached background process (won't block postCreateCommand)
-setsid /tmp/remove-extensions.sh </dev/null >/dev/null 2>&1 &
+        # Remove Kombai
+        if find "$VSCODE_EXT_DIR" -maxdepth 1 -type d -name "kombai.kombai-*" -exec rm -rf {} \; 2>/dev/null; then
+            echo "[$(date)] ✅ Removed Kombai" >> "$LOG_FILE"
+            REMOVAL_COUNT=$((REMOVAL_COUNT + 1))
+        fi
+
+        # Remove Test Explorer
+        if find "$VSCODE_EXT_DIR" -maxdepth 1 -type d -name "hbenl.vscode-test-explorer-*" -exec rm -rf {} \; 2>/dev/null; then
+            echo "[$(date)] ✅ Removed Test Explorer" >> "$LOG_FILE"
+            REMOVAL_COUNT=$((REMOVAL_COUNT + 1))
+        fi
+
+        # Remove Cline
+        if find "$VSCODE_EXT_DIR" -maxdepth 1 -type d -name "*claude-dev-*" -exec rm -rf {} \; 2>/dev/null; then
+            echo "[$(date)] ✅ Removed Cline" >> "$LOG_FILE"
+            REMOVAL_COUNT=$((REMOVAL_COUNT + 1))
+        fi
+
+        sleep 10
+    done
+
+    echo "[$(date)] Watchdog completed - Removed $REMOVAL_COUNT extension(s)" >> "$LOG_FILE"
+    echo "========================================" >> "$LOG_FILE"
+' </dev/null >/dev/null 2>&1 &
 disown
 
-success "Extension removal started in background"
+success "Extension watchdog started in background"
 
 echo ""
 
@@ -417,9 +449,20 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════
 
 echo ""
-echo "════════════════════════════════════════════════════════════════════"
-log "🔌 STEP 3/5: Installing MCP Servers (parallel installation)..."
-echo "════════════════════════════════════════════════════════════════════"
+echo "╔═══════════════════════════════════════════════════════════════════╗"
+echo "║  STEP 3/5: Installing MCP servers (parallel)                     ║"
+echo "╚═══════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "🔌 Installing 4 essential MCP servers:"
+echo "   • GitHub MCP - Repository access and API tools"
+echo "   • Filesystem MCP - Safe file operations"
+echo "   • Playwright MCP - Browser automation and testing"
+echo "   • Sequential Thinking MCP - Advanced reasoning"
+echo ""
+echo "💡 Note: Claude Flow provides 90+ additional MCP servers"
+echo "   (These 4 are installed for faster startup)"
+echo ""
+echo "⏱️  Installing in parallel - ~1-2 minutes"
 echo ""
 
 # Create temporary directory for installation logs
@@ -509,9 +552,17 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════
 
 echo ""
-echo "════════════════════════════════════════════════════════════════════"
-progress "STEP 4/5: Running verification checks..."
-echo "════════════════════════════════════════════════════════════════════"
+echo "╔═══════════════════════════════════════════════════════════════════╗"
+echo "║  STEP 4/5: Verifying installation                                ║"
+echo "╚═══════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "✅ Checking installed tools and configurations:"
+echo "   • Claude Code version and availability"
+echo "   • SuperClaude installation status"
+echo "   • MCP server configuration (.claude.json)"
+echo "   • Extension watchdog (background process)"
+echo ""
+echo "⏱️  Quick verification - ~30 seconds"
 echo ""
 
 PASS_COUNT=0
@@ -568,9 +619,14 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════
 
 echo ""
-echo "════════════════════════════════════════════════════════════════════"
-progress "STEP 5/5: Auto-renaming Codespace to match repository..."
-echo "════════════════════════════════════════════════════════════════════"
+echo "╔═══════════════════════════════════════════════════════════════════╗"
+echo "║  STEP 5/5: Finalizing setup                                      ║"
+echo "╚═══════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "🏷️  Auto-renaming codespace to match your repository name"
+echo "   (Makes it easier to identify in GitHub Codespaces list)"
+echo ""
+echo "⏱️  Final step - ~10 seconds"
 echo ""
 
 if [ -n "$CODESPACES" ] && [ -n "$GITHUB_REPOSITORY" ] && [ -n "$CODESPACE_NAME" ]; then
